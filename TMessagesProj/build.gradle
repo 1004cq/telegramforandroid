@@ -142,6 +142,10 @@ android {
 
         multiDexEnabled true
 
+        // Secrets stay in gitignored local.properties — never hardcode in source.
+        buildConfigField "int", "TELEGRAM_API_ID", String.valueOf(telegramApiId())
+        buildConfigField "String", "TELEGRAM_API_HASH", "\"${telegramApiHash()}\""
+
         externalNativeBuild {
             cmake {
                 version '3.22.1'
@@ -244,6 +248,23 @@ def getProps(String propName) {
     } else {
         return "";
     }
+}
+
+def telegramApiId() {
+    def raw = getProps("TELEGRAM_API_ID")
+    if (raw == null || raw.toString().trim().isEmpty()) {
+        return 0
+    }
+    return Integer.parseInt(raw.toString().trim())
+}
+
+def telegramApiHash() {
+    def raw = getProps("TELEGRAM_API_HASH")
+    if (raw == null) {
+        return ""
+    }
+    // Escape for Java string literal embedded in buildConfigField.
+    return raw.toString().trim().replace("\\", "\\\\").replace("\"", "\\\"")
 }
 apply plugin: 'com.google.gms.google-services'
 

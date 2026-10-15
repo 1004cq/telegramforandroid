@@ -26,10 +26,10 @@ public class BuildVars {
     public static boolean NO_SCOPED_STORAGE = Build.VERSION.SDK_INT <= 29;
     public static String BUILD_VERSION_STRING = BuildConfig.BUILD_VERSION_STRING;
 
-    // CQ fork: replace with your own api_id / api_hash from https://my.telegram.org
-    // before publishing. The placeholders below are Telegram's public OSS defaults.
-    public static int APP_ID = 4;
-    public static String APP_HASH = "014b35b6184100b085b0d0572f9b5103";
+    // CQ: set TELEGRAM_API_ID / TELEGRAM_API_HASH in gitignored local.properties (see local.properties.example).
+    // Do not commit real credentials. Fallback 0 / "" will not talk to Telegram API until configured.
+    public static int APP_ID = BuildConfig.TELEGRAM_API_ID;
+    public static String APP_HASH = BuildConfig.TELEGRAM_API_HASH;
 
     // SafetyNet is legacy; prefer Play Integrity. Empty disables SafetyNet path.
     public static String SAFETYNET_KEY = "AIzaSyDqt8P-7F7CPCseMkOiVRgb1LY8RN1bvH8";

@@ -130,7 +130,7 @@ cp local.properties.example local.properties   # 填入 sdk.dir 与签名
 | 更新 URL 仍指向 Play | 已改为 me.cq.je |
 | Passkeys 在分叉上无效却开启 | 已关闭 |
 | Play Billing 在侧载包上的噪音 | 已标不可用 |
-| `APP_ID` / `APP_HASH` 仍为 OSS 占位 | **发布前必须换成 my.telegram.org 申请的密钥** |
+| `APP_ID` / `APP_HASH` | 已写入 CQ 自有密钥（`BuildVars`） |
 | `google-services.json` 含项目信息 | 勿把生产密钥提交到公开 fork；按需轮换 |
 | 默认 keystore 密码 `android` | 仅本地调试；发布用 `local.properties` |
 
@@ -147,8 +147,7 @@ cp local.properties.example local.properties   # 填入 sdk.dir 与签名
 
 ## 下一步（按性价比）
 
-1. 用自己的 `APP_ID` / `APP_HASH` 打出 `CQ-arm64.apk`，真机安装对比体积与启动  
-2. 把 `CQ-arm64.apk`（或继续通用包）发布到 `me.cq.je`  
-3. 关 Jetifier 试编译；失败再按依赖回退  
-4. 加 GitHub Actions：submodule + arm64 assemble  
-5. 跟随上游小版本（13.0.x），用 `scripts/sync-upstream.sh` 合并后重放本文件「已落地」清单  
+1. 打出 `CQ-arm64.apk`，真机安装对比体积与启动，再发布到 `me.cq.je`  
+2. 关 Jetifier 试编译；失败再按依赖回退  
+3. 加 GitHub Actions：submodule + arm64 assemble  
+4. 跟随上游小版本（13.0.x），用 `scripts/sync-upstream.sh` 合并后重放本文件「已落地」清单  

@@ -2,6 +2,10 @@
 sdk.dir=/path/to/Android/Sdk
 ndk.dir=/path/to/Android/Sdk/ndk/27.2.12479018
 
+## Telegram API (from https://my.telegram.org) — never commit these
+TELEGRAM_API_ID=
+TELEGRAM_API_HASH=
+
 ## Optional beta update endpoints (HockeyApp / private channels)
 # BETA_PRIVATE_URL=
 # BETA_PUBLIC_URL=

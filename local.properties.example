@@ -1,0 +1,14 @@
+## Copy to local.properties (gitignored) and fill in real values.
+sdk.dir=/path/to/Android/Sdk
+ndk.dir=/path/to/Android/Sdk/ndk/27.2.12479018
+
+## Optional beta update endpoints (HockeyApp / private channels)
+# BETA_PRIVATE_URL=
+# BETA_PUBLIC_URL=
+# BETA_HARDCORE_URL=
+
+## Release signing (required for installable release APKs)
+RELEASE_STORE_FILE=../keystore/cq-release.keystore
+RELEASE_STORE_PASSWORD=change-me
+RELEASE_KEY_ALIAS=cq
+RELEASE_KEY_PASSWORD=change-me

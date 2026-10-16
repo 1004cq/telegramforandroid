@@ -239,8 +239,9 @@ public abstract class BlurredBackgroundDrawable extends Drawable {
         public int padding;
         public boolean hasPadding;
         public int liquidThickness;
-        public float liquidIntensity = 0.75f;
-        public float liquidIndex = 1.5f;
+        // CQ: slightly stronger refraction to feel closer to iOS 26 Liquid Glass.
+        public float liquidIntensity = 0.92f;
+        public float liquidIndex = 1.55f;
 
         public float strokeWidthTop;
         public float strokeWidthBottom;

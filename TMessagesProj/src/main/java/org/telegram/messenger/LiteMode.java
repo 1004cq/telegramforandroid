@@ -63,12 +63,15 @@ public class LiteMode {
         FLAG_ANIMATED_EMOJI_REACTIONS_PREMIUM |
         FLAG_ANIMATED_EMOJI_CHAT |
         FLAG_CHAT_FORUM_TWOCOLUMN |
+        FLAG_CHAT_BLUR |
         FLAG_CALLS_ANIMATIONS |
         FLAG_AUTOPLAY_VIDEOS |
         FLAG_AUTOPLAY_GIFS |
         FLAG_CHAT_THANOS |
-        FLAG_PARTICLES
-    ); // 204383
+        FLAG_PARTICLES |
+        // CQ: closer to iOS 26 Telegram — Liquid Glass on by default for mid+ devices.
+        FLAG_LIQUID_GLASS
+    );
     public static int PRESET_HIGH = (
         FLAGS_ANIMATED_STICKERS |
         FLAGS_ANIMATED_EMOJI |
@@ -81,8 +84,9 @@ public class LiteMode {
         FLAG_CALLS_ANIMATIONS |
         FLAG_AUTOPLAY_VIDEOS |
         FLAG_AUTOPLAY_GIFS |
-        FLAG_PARTICLES
-    ); // 262143
+        FLAG_PARTICLES |
+        FLAG_LIQUID_GLASS
+    );
     public static int PRESET_POWER_SAVER = 0;
 
     private static int BATTERY_LOW = 10;
@@ -213,7 +217,12 @@ public class LiteMode {
         if (!preferences.contains("lite_mode6")) {
             if (preferences.contains("lite_mode5")) {
                 defaultValue = preferences.getInt("lite_mode5", defaultValue);
-                defaultValue &=~ FLAG_LIQUID_GLASS;
+                // CQ: prefer Liquid Glass (iOS 26-style) on capable devices instead of stripping it.
+                if (Build.VERSION.SDK_INT >= 33 && SharedConfig.getDevicePerformanceClass() != SharedConfig.PERFORMANCE_CLASS_LOW) {
+                    defaultValue |= FLAG_LIQUID_GLASS | FLAG_CHAT_BLUR;
+                } else {
+                    defaultValue &= ~FLAG_LIQUID_GLASS;
+                }
                 preferences.edit().putInt("lite_mode6", defaultValue).apply();
             } else if (preferences.contains("lite_mode4")) {
                 defaultValue = preferences.getInt("lite_mode4", defaultValue);
@@ -278,6 +287,16 @@ public class LiteMode {
 
         int prevValue = value;
         value = preferences.getInt("lite_mode6", defaultValue);
+        // CQ one-shot: turn Liquid Glass on for existing installs on mid/high devices (API 33+).
+        // Users can still disable it in Settings > Power Saving / Lite Mode.
+        if (!preferences.getBoolean("cq_liquid_glass_default_v1", false)) {
+            SharedPreferences.Editor editor = preferences.edit().putBoolean("cq_liquid_glass_default_v1", true);
+            if (Build.VERSION.SDK_INT >= 33 && SharedConfig.getDevicePerformanceClass() != SharedConfig.PERFORMANCE_CLASS_LOW) {
+                value |= FLAG_LIQUID_GLASS | FLAG_CHAT_BLUR;
+                editor.putInt("lite_mode6", value);
+            }
+            editor.apply();
+        }
         if (loaded) {
             onFlagsUpdate(prevValue, value);
         }

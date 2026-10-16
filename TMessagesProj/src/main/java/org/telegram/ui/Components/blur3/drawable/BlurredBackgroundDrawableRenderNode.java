@@ -116,7 +116,7 @@ public class BlurredBackgroundDrawableRenderNode extends BlurredBackgroundDrawab
         c.translate(-sL, -sT);
         if (liquidGlassEffect != null && Build.VERSION.SDK_INT >= 33) {
             final int thickness = Math.max(Math.min(
-                boundProps.liquidThickness <= 0 ? dp(11) : boundProps.liquidThickness,
+                boundProps.liquidThickness <= 0 ? dp(13) : boundProps.liquidThickness,
                 Math.min(boundProps.boundsWithPadding.width(), boundProps.boundsWithPadding.height()) / 5), 1);
 
             liquidGlassEffect.update(

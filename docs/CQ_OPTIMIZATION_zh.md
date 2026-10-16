@@ -30,9 +30,13 @@
 | `CQ_ARM64_ONLY` | `gradle.properties` 开关，为 true 时跳过 afat 通用包 |
 | `BuildVars` 分叉默认 | `SUPPORTS_PASSKEYS=false`、`IS_BILLING_UNAVAILABLE=true`、更新 URL → me.cq.je；API 密钥走 `local.properties` |
 | `ApplicationLoaderImpl.isStandalone()` | 侧载分发走 standalone 更新路径 |
+| 登录页代理按钮 | **始终显示**，未登录即可配置代理 |
+| Liquid Glass（对齐 iOS 26） | 中高端机 + API 33 默认开启；略增强折射强度 |
 | `org.gradle.caching=true` | 加速重复构建 |
 | `local.properties.example` | 密钥 / SDK 不进仓库 |
 | `scripts/sync-upstream.sh` | 同步上游后提醒重放 CQ 覆盖层 |
+
+> 说明：要「和 iOS 26 Telegram 一样好」，主体体验应持续跟随 [DrKLO/Telegram](https://github.com/DrKLO/Telegram) 小版本；CQ 层负责默认开启 Liquid Glass、品牌与分发，而不是重写整套 UI。可在 **设置 → 省电 / 动画** 中关闭玻璃效果。
 
 ### 推荐本地构建
 

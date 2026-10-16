@@ -1,6 +1,7 @@
 package org.telegram.utils.proxy;
 
 import android.os.Build;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import androidx.webkit.ProxyConfig;
@@ -40,7 +41,7 @@ public final class WebViewProxyHelper {
 
     /** Apply or clear WebView proxy to match the current client proxy setting. */
     public static void syncFromSharedConfig() {
-        if (!AndroidUtilities.isMainThread()) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
             AndroidUtilities.runOnUIThread(WebViewProxyHelper::syncFromSharedConfig);
             return;
         }
@@ -61,7 +62,7 @@ public final class WebViewProxyHelper {
      * Called from {@link org.telegram.tgnet.ConnectionsManager#setProxySettings}.
      */
     public static void apply(ProxySettings settings) {
-        if (!AndroidUtilities.isMainThread()) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
             final ProxySettings copy = settings;
             AndroidUtilities.runOnUIThread(() -> apply(copy));
             return;
@@ -119,7 +120,7 @@ public final class WebViewProxyHelper {
     }
 
     public static void clear() {
-        if (!AndroidUtilities.isMainThread()) {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
             AndroidUtilities.runOnUIThread(WebViewProxyHelper::clear);
             return;
         }

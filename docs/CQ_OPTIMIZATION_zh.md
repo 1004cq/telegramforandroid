@@ -2,7 +2,8 @@
 
 **基准：** DrKLO/Telegram `f32ffeec`（13.0.2 / 7175）  
 **对照 APK：** `https://me.cq.je/CQ.apk`（`je.cq.tg`，versionCode `71759`）  
-**审查方式：** 只读审计 + 低风险、可回滚的 CQ 分发层改动（见下方「已落地」）
+**审查方式：** 只读审计 + 低风险、可回滚的 CQ 分发层改动（见下方「已落地」）  
+**执行级路线图：** 见 [`CQ_OPTIMIZATION_ROADMAP_zh.md`](./CQ_OPTIMIZATION_ROADMAP_zh.md)（UI / 动画 / 依赖 / 推送代理 / Kotlin）
 
 ---
 

@@ -28,7 +28,7 @@
 | `AppName=CQ` | 应用显示名 |
 | `arm64` productFlavor | 仅打包 `arm64-v8a`，输出 `CQ-arm64.apk` |
 | `CQ_ARM64_ONLY` | `gradle.properties` 开关，为 true 时跳过 afat 通用包 |
-| `BuildVars` 分叉默认 | `SUPPORTS_PASSKEYS=false`、`IS_BILLING_UNAVAILABLE=true`、更新 URL → me.cq.je |
+| `BuildVars` 分叉默认 | `SUPPORTS_PASSKEYS=false`、`IS_BILLING_UNAVAILABLE=true`、更新 URL → me.cq.je；API 密钥走 `local.properties` |
 | `ApplicationLoaderImpl.isStandalone()` | 侧载分发走 standalone 更新路径 |
 | `org.gradle.caching=true` | 加速重复构建 |
 | `local.properties.example` | 密钥 / SDK 不进仓库 |
@@ -130,7 +130,7 @@ cp local.properties.example local.properties   # 填入 sdk.dir 与签名
 | 更新 URL 仍指向 Play | 已改为 me.cq.je |
 | Passkeys 在分叉上无效却开启 | 已关闭 |
 | Play Billing 在侧载包上的噪音 | 已标不可用 |
-| `APP_ID` / `APP_HASH` | 已写入 CQ 自有密钥（`BuildVars`） |
+| `APP_ID` / `APP_HASH` | 通过 gitignored `local.properties` 注入 BuildConfig，**不要提交仓库** |
 | `google-services.json` 含项目信息 | 勿把生产密钥提交到公开 fork；按需轮换 |
 | 默认 keystore 密码 `android` | 仅本地调试；发布用 `local.properties` |
 

@@ -32,7 +32,7 @@ Outputs are named `CQ.apk` / `CQ-arm64.apk` under the App module build directory
 - Optional `arm64` flavor and `CQ_ARM64_ONLY` Gradle flag
 - Secrets belong in `local.properties`, not in git
 
-`APP_ID` / `APP_HASH` for this CQ fork are configured in `BuildVars.java`.
+Set `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` in gitignored `local.properties` (see `local.properties.example`). Do not commit them.
 
 ## License
 

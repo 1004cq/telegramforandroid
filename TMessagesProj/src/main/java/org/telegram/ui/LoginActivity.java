@@ -8789,16 +8789,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         String proxyAddress = preferences.getString("proxy_ip", "");
         final boolean proxyEnabled = preferences.getBoolean("proxy_enabled", false) && !TextUtils.isEmpty(proxyAddress);
         final boolean connected = currentConnectionState == ConnectionsManager.ConnectionStateConnected || currentConnectionState == ConnectionsManager.ConnectionStateUpdating;
-        final boolean connecting = currentConnectionState == ConnectionsManager.ConnectionStateConnecting || currentConnectionState == ConnectionsManager.ConnectionStateWaitingForNetwork || currentConnectionState == ConnectionsManager.ConnectionStateConnectingToProxy;
-        if (proxyEnabled) {
-            proxyDrawable.setConnected(true, connected, animated);
-            showProxyButton(true, animated);
-        } else if (getMessagesController().blockedCountry && !SharedConfig.proxyList.isEmpty() || connecting) {
-            proxyDrawable.setConnected(true, connected, animated);
-            showProxyButtonDelayed();
-        } else {
-            showProxyButton(false, animated);
-        }
+        // CQ: always show the proxy entry on the login screen so users can
+        // configure SOCKS5 / MTProto before signing in.
+        proxyDrawable.setConnected(proxyEnabled || !SharedConfig.proxyList.isEmpty(), connected, animated);
+        showProxyButton(true, animated);
     }
     
     private boolean proxyButtonVisible;

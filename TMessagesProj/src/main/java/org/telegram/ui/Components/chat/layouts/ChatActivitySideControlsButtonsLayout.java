@@ -212,16 +212,20 @@ public class ChatActivitySideControlsButtonsLayout extends FrameLayout implement
     private ButtonHolder getOrCreateButtonHolder(final int buttonId) {
         if (buttonHolders[buttonId] == null) {
 
+            // PAGE_DOWN (new-message tip) uses a softer ease-out-quint so the
+            // floating badge eases in/out instead of a hard decelerate snap.
+            final boolean softEnter = buttonId == BUTTON_ATTACH || buttonId == BUTTON_PAGE_DOWN
+                    || buttonId == BUTTON_MENTION || buttonId == BUTTON_REACTIONS;
             final BoolAnimator visibilityAnimator = new BoolAnimator(
                 (buttonId << 16) | ANIMATOR_ID_VISIBILITY, this,
-                buttonId == BUTTON_ATTACH ? CubicBezierInterpolator.EASE_OUT_QUINT : AnimatorUtils.DECELERATE_INTERPOLATOR,
-                buttonId == BUTTON_ATTACH ? 300 : 280
+                softEnter ? CubicBezierInterpolator.EASE_OUT_QUINT : AnimatorUtils.DECELERATE_INTERPOLATOR,
+                softEnter ? 260 : 280
             );
 
             final BoolAnimator counterVisibilityAnimator = new BoolAnimator(
                 (buttonId << 16) | ANIMATOR_ID_COUNTER_VISIBILITY, this,
-                buttonId == BUTTON_ATTACH ? CubicBezierInterpolator.EASE_OUT_QUINT : AnimatorUtils.DECELERATE_INTERPOLATOR,
-                buttonId == BUTTON_ATTACH ? 300 : 280);
+                softEnter ? CubicBezierInterpolator.EASE_OUT_QUINT : AnimatorUtils.DECELERATE_INTERPOLATOR,
+                softEnter ? 240 : 280);
 
             int size = 56, iconSize = 48;
             if (buttonId == BUTTON_ATTACH) {

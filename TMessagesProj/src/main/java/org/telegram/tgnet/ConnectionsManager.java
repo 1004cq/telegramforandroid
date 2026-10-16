@@ -47,6 +47,7 @@ import org.telegram.messenger.UserConfig;
 import org.telegram.messenger.Utilities;
 import org.telegram.utils.proxy.WebProxyConnectionTester;
 import org.telegram.utils.proxy.WebProxyTransport;
+import org.telegram.utils.proxy.WebViewProxyHelper;
 import org.telegram.utils.proxy.ProxySettings;
 import org.telegram.ui.Components.VideoPlayer;
 import org.telegram.ui.LoginActivity;
@@ -657,6 +658,9 @@ public class ConnectionsManager extends BaseController {
                 native_setProxySettings(currentAccount, proxySettings.getAddress(), proxySettings.getPort(),
                         proxySettings.getUser(), proxySettings.getPassword(), proxySettings.getSecret());
             }
+            WebViewProxyHelper.apply(proxySettings);
+        } else {
+            WebViewProxyHelper.clear();
         }
         String installer = "";
         try {
@@ -995,6 +999,12 @@ public class ConnectionsManager extends BaseController {
             if (accountInstance.getUserConfig().isClientActivated()) {
                 accountInstance.getMessagesController().checkPromoInfo(true);
             }
+        }
+        // Keep in-app WebView / ArticleViewer browser on the same SOCKS5 proxy.
+        if (enabled && settings != null && settings.isValid()) {
+            WebViewProxyHelper.apply(settings);
+        } else {
+            WebViewProxyHelper.clear();
         }
     }
 

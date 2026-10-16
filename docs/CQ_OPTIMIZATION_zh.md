@@ -2,7 +2,8 @@
 
 **基准：** DrKLO/Telegram `f32ffeec`（13.0.2 / 7175）  
 **对照 APK：** `https://me.cq.je/CQ.apk`（`je.cq.tg`，versionCode `71759`）  
-**审查方式：** 只读审计 + 低风险、可回滚的 CQ 分发层改动（见下方「已落地」）
+**审查方式：** 只读审计 + 低风险、可回滚的 CQ 分发层改动（见下方「已落地」）  
+**执行级路线图：** 见 [`CQ_OPTIMIZATION_ROADMAP_zh.md`](./CQ_OPTIMIZATION_ROADMAP_zh.md)（UI / 动画 / 依赖 / 推送代理 / Kotlin）
 
 ---
 
@@ -31,6 +32,9 @@
 | `BuildVars` 分叉默认 | `SUPPORTS_PASSKEYS=false`、`IS_BILLING_UNAVAILABLE=true`、更新 URL → me.cq.je；API 密钥走 `local.properties` |
 | `ApplicationLoaderImpl.isStandalone()` | 侧载分发走 standalone 更新路径 |
 | 登录页代理按钮 | **始终显示**，未登录即可配置代理 |
+| 应用内浏览器走代理 | SOCKS5 经 `ProxyController` 作用于 ArticleViewer / WebView（见 `docs/WEBVIEW_PROXY_zh.md`） |
+| 聊天消息加载动画 | 历史淡入上移、新消息底部插入、首屏渐显；大批量自动降级（见 `docs/CHAT_MESSAGE_LOAD_ANIM_zh.md`） |
+| 聊天列表 MD3 点状优化 | 文件夹 Chip、DialogCell 间距、底栏选中、列表插入动画（见 `docs/DIALOGS_MD3_zh.md`） |
 | Liquid Glass（对齐 iOS 26） | 中高端机 + API 33 默认开启；略增强折射强度 |
 | `org.gradle.caching=true` | 加速重复构建 |
 | `local.properties.example` | 密钥 / SDK 不进仓库 |

@@ -896,6 +896,7 @@ public class ChatActivity extends BaseFragment implements
     private boolean hideForwardEndReached;
     private boolean loading = true;
     private boolean firstLoading = true;
+    private boolean initialMessagesAppearPlayed;
     private boolean chatWasReset;
     private boolean firstUnreadSent;
     private int loadsCount;
@@ -15721,6 +15722,7 @@ public class ChatActivity extends BaseFragment implements
         if (full) {
             first = true;
             firstLoading = true;
+            initialMessagesAppearPlayed = false;
             loading = true;
             loadingForward = false;
         }
@@ -21688,6 +21690,9 @@ public class ChatActivity extends BaseFragment implements
                 }
 
                 if (first) {
+                    if (openAnimationEnded) {
+                        AndroidUtilities.runOnUIThread(this::maybePlayInitialMessagesAppear);
+                    }
                     if (chatListView != null) {
                         AndroidUtilities.runOnUIThread(() -> {
                             createEmptyView(false);
@@ -27341,6 +27346,49 @@ public class ChatActivity extends BaseFragment implements
         }
     }
 
+    /**
+     * Soft staggered fade+rise for the first visible messages after opening a chat.
+     * Skipped on low-end devices, when animations are off, or when too many cells are visible.
+     */
+    private void maybePlayInitialMessagesAppear() {
+        if (initialMessagesAppearPlayed || chatListView == null || chatListItemAnimator == null) {
+            return;
+        }
+        if (!SharedConfig.animationsEnabled()) {
+            initialMessagesAppearPlayed = true;
+            return;
+        }
+        final int childCount = chatListView.getChildCount();
+        if (childCount <= 0) {
+            initialMessagesAppearPlayed = true;
+            return;
+        }
+        initialMessagesAppearPlayed = true;
+        final int animateLimit = ChatListItemAnimator.maxAnimatedAdditions();
+        int animated = 0;
+        for (int i = childCount - 1; i >= 0 && animated < animateLimit; i--) {
+            View child = chatListView.getChildAt(i);
+            if (!(child instanceof ChatMessageCell) && !(child instanceof ChatActionCell)) {
+                continue;
+            }
+            child.animate().cancel();
+            child.setAlpha(0f);
+            child.setScaleX(0.94f);
+            child.setScaleY(0.94f);
+            child.setTranslationY(AndroidUtilities.dp(10));
+            child.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .translationY(0)
+                    .setStartDelay(animated * 20L)
+                    .setDuration(ChatListItemAnimator.DEFAULT_DURATION)
+                    .setInterpolator(ChatListItemAnimator.HISTORY_ENTER_INTERPOLATOR)
+                    .start();
+            animated++;
+        }
+    }
+
     long startMs;
     @Override
     public void onTransitionAnimationStart(boolean isOpen, boolean backward) {
@@ -27401,6 +27449,7 @@ public class ChatActivity extends BaseFragment implements
         if (isOpen) {
             checkShowBlur(false);
             openAnimationEnded = true;
+            maybePlayInitialMessagesAppear();
             getNotificationCenter().onAnimationFinish(transitionAnimationIndex);
             NotificationCenter.getGlobalInstance().onAnimationFinish(transitionAnimationGlobalIndex);
 //            if (Build.VERSION.SDK_INT >= 21) {
@@ -38522,7 +38571,11 @@ public class ChatActivity extends BaseFragment implements
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("notify item range inserted " + positionStart + ":" + itemCount);
             }
-            if (!fragmentBeginToShow) {
+            // Keep ItemAnimator so visible inserts play a complete enter; only detach
+            // when animations are off / degraded / fast-scroll (animator snaps extras).
+            final boolean keepAnim = fragmentBeginToShow
+                    && (chatListItemAnimator == null || chatListItemAnimator.shouldKeepItemAnimatorForInsert(itemCount));
+            if (!keepAnim) {
                 chatListView.setItemAnimator(null);
             } else if (chatListView.getItemAnimator() != chatListItemAnimator) {
                 chatListView.setItemAnimator(chatListItemAnimator);

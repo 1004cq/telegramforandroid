@@ -15,8 +15,8 @@ import androidx.annotation.Nullable;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.recyclerview.ChatListItemAnimator;
 import org.telegram.ui.Components.blur3.BlurredBackgroundDrawableViewFactory;
 import org.telegram.ui.Components.blur3.drawable.color.BlurredBackgroundColorProvider;
 import org.telegram.ui.Components.chat.buttons.ChatActivityBlurredRoundPageDownButton;
@@ -212,16 +212,19 @@ public class ChatActivitySideControlsButtonsLayout extends FrameLayout implement
     private ButtonHolder getOrCreateButtonHolder(final int buttonId) {
         if (buttonHolders[buttonId] == null) {
 
+            // PAGE_DOWN / mention / reactions: full Material FastOutSlowIn enter (~260ms).
+            final boolean softEnter = buttonId == BUTTON_ATTACH || buttonId == BUTTON_PAGE_DOWN
+                    || buttonId == BUTTON_MENTION || buttonId == BUTTON_REACTIONS;
             final BoolAnimator visibilityAnimator = new BoolAnimator(
                 (buttonId << 16) | ANIMATOR_ID_VISIBILITY, this,
-                buttonId == BUTTON_ATTACH ? CubicBezierInterpolator.EASE_OUT_QUINT : AnimatorUtils.DECELERATE_INTERPOLATOR,
-                buttonId == BUTTON_ATTACH ? 300 : 280
+                softEnter ? ChatListItemAnimator.FAST_OUT_SLOW_IN : AnimatorUtils.DECELERATE_INTERPOLATOR,
+                softEnter ? 260 : 280
             );
 
             final BoolAnimator counterVisibilityAnimator = new BoolAnimator(
                 (buttonId << 16) | ANIMATOR_ID_COUNTER_VISIBILITY, this,
-                buttonId == BUTTON_ATTACH ? CubicBezierInterpolator.EASE_OUT_QUINT : AnimatorUtils.DECELERATE_INTERPOLATOR,
-                buttonId == BUTTON_ATTACH ? 300 : 280);
+                softEnter ? ChatListItemAnimator.FAST_OUT_SLOW_IN : AnimatorUtils.DECELERATE_INTERPOLATOR,
+                softEnter ? 260 : 280);
 
             int size = 56, iconSize = 48;
             if (buttonId == BUTTON_ATTACH) {

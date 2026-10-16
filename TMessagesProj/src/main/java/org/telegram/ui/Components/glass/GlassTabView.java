@@ -64,9 +64,10 @@ public class GlassTabView extends FrameLayout implements MainTabsLayout.Tab, Fac
     private static final int ANIMATOR_ID_COUNTER_VISIBLE = 1;
     private static final int ANIMATOR_ID_COUNTER_ERROR = 2;
 
-    private final BoolAnimator isSelectedAnimator = new BoolAnimator(ANIMATOR_ID_IS_SELECTED, this, AnimatorUtils.DECELERATE_INTERPOLATOR, 320);
-    private final BoolAnimator isHasCounterAnimator = new BoolAnimator(ANIMATOR_ID_COUNTER_VISIBLE, this, CubicBezierInterpolator.EASE_OUT_QUINT, 380);
-    private final BoolAnimator isHasCounterErrorAnimator = new BoolAnimator(ANIMATOR_ID_COUNTER_ERROR, this, CubicBezierInterpolator.EASE_OUT_QUINT, 380);
+    // Material 3 bottom nav: FastOutSlowIn-like quint, ~260ms selection feedback.
+    private final BoolAnimator isSelectedAnimator = new BoolAnimator(ANIMATOR_ID_IS_SELECTED, this, CubicBezierInterpolator.EASE_OUT_QUINT, 260);
+    private final BoolAnimator isHasCounterAnimator = new BoolAnimator(ANIMATOR_ID_COUNTER_VISIBLE, this, CubicBezierInterpolator.EASE_OUT_QUINT, 240);
+    private final BoolAnimator isHasCounterErrorAnimator = new BoolAnimator(ANIMATOR_ID_COUNTER_ERROR, this, CubicBezierInterpolator.EASE_OUT_QUINT, 240);
     private int colorSelected;
     private int colorSelectedText;
     private int colorDefault;

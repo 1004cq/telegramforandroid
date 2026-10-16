@@ -173,8 +173,9 @@ public class FilterTabsView extends FrameLayout {
         }
     }
 
-    private static final float TAB_PADDING_WIDTH = 24;
-    private static final float TAB_INTERNAL_PADDING = 12.5f;
+    // MD3-ish Filter Chip: slightly wider horizontal padding + pill indicator.
+    private static final float TAB_PADDING_WIDTH = 28;
+    private static final float TAB_INTERNAL_PADDING = 14f;
     private static final float TAB_COUNTER_HEIGHT = 17.333f;
 
     public class TabView extends View {
@@ -834,7 +835,9 @@ public class FilterTabsView extends FrameLayout {
 
     private boolean invalidated;
 
-    private final CubicBezierInterpolator interpolator = CubicBezierInterpolator.EASE_OUT_QUINT;
+    /** Material FastOutSlowIn for folder chip selection (≈200–300ms). */
+    private final android.view.animation.Interpolator interpolator =
+            new android.view.animation.PathInterpolator(0.4f, 0f, 0.2f, 1f);
 
     private final SparseIntArray positionToId = new SparseIntArray(5);
     private final SparseIntArray positionToStableId = new SparseIntArray(5);
@@ -863,7 +866,7 @@ public class FilterTabsView extends FrameLayout {
             if (dt > 17) {
                 dt = 17;
             }
-            animationTime += dt / 320.0f;
+            animationTime += dt / 260.0f; // MD3 selection window ~260ms
             setAnimationIdicatorProgress(interpolator.getInterpolation(animationTime));
             if (animationTime > 1.0f) {
                 animationTime = 1.0f;
@@ -913,7 +916,8 @@ public class FilterTabsView extends FrameLayout {
         deletePaint.setStrokeWidth(dp(1.5f));
 
         selectorDrawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, null);
-        float rad = AndroidUtilities.dpf2(14);
+        // Full pill/chip corner (MD3 Assist/Filter Chip style).
+        float rad = AndroidUtilities.dpf2(16);
         selectorDrawable.setCornerRadii(new float[]{rad, rad, rad, rad, rad, rad, rad, rad});
         selectorDrawable.setColor(Theme.getColor(tabLineColorKey, resourcesProvider));
 

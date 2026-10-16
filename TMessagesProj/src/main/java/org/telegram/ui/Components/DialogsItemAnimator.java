@@ -272,19 +272,16 @@ public class DialogsItemAnimator extends SimpleItemAnimator {
     @Override
     public boolean animateAdd(final ViewHolder holder) {
         resetAnimation(holder);
-        if (!(holder.itemView instanceof DialogCell)) {
-            holder.itemView.setAlpha(0);
+        // Complete enter for every insert: fade + slight rise (including DialogCell).
+        holder.itemView.setAlpha(0);
+        if (holder.itemView.getTranslationY() == 0f) {
+            holder.itemView.setTranslationY(AndroidUtilities.dp(8));
+        }
+        if (holder.itemView instanceof DialogCell) {
+            ((DialogCell) holder.itemView).setMoving(true);
         }
 
         mPendingAdditions.add(holder);
-        if (mPendingAdditions.size() > 2) {
-            for (int i = 0; i < mPendingAdditions.size(); i++) {
-                mPendingAdditions.get(i).itemView.setAlpha(0);
-                if (mPendingAdditions.get(i).itemView instanceof DialogCell) {
-                    ((DialogCell) mPendingAdditions.get(i).itemView).setMoving(true);
-                }
-            }
-        }
         return true;
     }
 
@@ -292,8 +289,11 @@ public class DialogsItemAnimator extends SimpleItemAnimator {
         final View view = holder.itemView;
         mAddAnimations.add(holder);
 
-        if (view.getAlpha() < 1f && view.getTranslationY() == 0f) {
-            view.setTranslationY(AndroidUtilities.dp(6));
+        if (view.getTranslationY() == 0f) {
+            view.setTranslationY(AndroidUtilities.dp(8));
+        }
+        if (view.getAlpha() >= 0.999f) {
+            view.setAlpha(0f);
         }
         final ViewPropertyAnimator animation = view.animate();
         animation.alpha(1)
@@ -315,6 +315,7 @@ public class DialogsItemAnimator extends SimpleItemAnimator {
                     @Override
                     public void onAnimationEnd(Animator animator) {
                         animation.setListener(null);
+                        view.setAlpha(1);
                         view.setTranslationY(0);
                         dispatchAddFinished(holder);
                         mAddAnimations.remove(holder);

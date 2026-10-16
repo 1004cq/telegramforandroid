@@ -60,13 +60,15 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
     private static final float NEW_MESSAGE_SPRING_DAMPING = SpringForce.DAMPING_RATIO_NO_BOUNCY;
 
     /** Slight upward travel when older messages fade in (dp). */
-    private static final float HISTORY_ENTER_TRANSLATION_DP = 10f;
+    private static final float HISTORY_ENTER_TRANSLATION_DP = 12f;
+    /** History soft scale start — full enter includes scale settle. */
+    private static final float HISTORY_ENTER_START_SCALE = 0.92f;
     /** New messages: start slightly transparent + micro-scale. */
-    private static final float NEW_MESSAGE_START_ALPHA = 0.55f;
-    private static final float NEW_MESSAGE_START_SCALE = 0.96f;
+    private static final float NEW_MESSAGE_START_ALPHA = 0.4f;
+    private static final float NEW_MESSAGE_START_SCALE = 0.94f;
     /** Cap staggered delays so large history batches stay snappy. */
-    private static final long MAX_STAGGER_DELAY_MS = 72;
-    private static final long STAGGER_STEP_MS = 16;
+    private static final long MAX_STAGGER_DELAY_MS = 96;
+    private static final long STAGGER_STEP_MS = 18;
 
     @Nullable
     private final ChatActivity activity;
@@ -104,8 +106,8 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
     }
 
     /**
-     * Max number of simultaneous add animations before we snap in (performance degrade).
-     * Low-end devices animate fewer cells.
+     * Max number of simultaneous add animations; extras snap in so the visible
+     * subset still plays a <b>complete</b> enter (fade + rise + scale / spring).
      */
     public static int maxAnimatedAdditions() {
         if (!SharedConfig.animationsEnabled()) {
@@ -113,14 +115,19 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
         }
         int perf = SharedConfig.getDevicePerformanceClass();
         if (perf == SharedConfig.PERFORMANCE_CLASS_LOW) {
-            return 4;
-        }
-        if (perf == SharedConfig.PERFORMANCE_CLASS_AVERAGE) {
             return 10;
         }
-        return 16;
+        if (perf == SharedConfig.PERFORMANCE_CLASS_AVERAGE) {
+            return 18;
+        }
+        return 28;
     }
 
+    /**
+     * Only skip the entire add batch when animations are off, explicitly degraded,
+     * or a fast-scroll load is running. Large batches still animate the first
+     * {@link #maxAnimatedAdditions()} holders fully.
+     */
     public boolean shouldSkipAddAnimations(int pendingCount) {
         if (!SharedConfig.animationsEnabled()) {
             return true;
@@ -131,7 +138,12 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
         if (recyclerListView != null && recyclerListView.isFastScrollAnimationRunning()) {
             return true;
         }
-        return pendingCount > maxAnimatedAdditions();
+        return pendingCount <= 0;
+    }
+
+    /** True when the adapter should keep the ItemAnimator attached for this insert. */
+    public boolean shouldKeepItemAnimatorForInsert(int itemCount) {
+        return !shouldSkipAddAnimations(itemCount);
     }
 
     public void setAnimationsDegraded(boolean degraded) {
@@ -309,17 +321,35 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
 
             alphaEnterDelay = 0;
             Collections.sort(additions, (i1, i2) -> i2.itemView.getTop() - i1.itemView.getTop());
-            if (shouldSkipAddAnimations(additions.size())) {
-                for (RecyclerView.ViewHolder holder : additions) {
-                    snapAddFinished(holder);
-                }
-            } else {
-                int index = 0;
-                for (RecyclerView.ViewHolder holder : additions) {
-                    animateHistoryAddImpl(holder, index++);
-                }
-            }
+            dispatchCompleteAddBatch(additions, false, 0);
             additions.clear();
+        }
+    }
+
+    /**
+     * Play full enter animations for up to {@link #maxAnimatedAdditions()} holders;
+     * snap the remainder so big history loads stay smooth without killing visible motion.
+     */
+    private void dispatchCompleteAddBatch(ArrayList<RecyclerView.ViewHolder> additions, boolean fromBottom, int addedItemsHeight) {
+        if (shouldSkipAddAnimations(additions.size())) {
+            for (RecyclerView.ViewHolder holder : additions) {
+                snapAddFinished(holder);
+            }
+            return;
+        }
+        final int animateLimit = maxAnimatedAdditions();
+        int animated = 0;
+        for (RecyclerView.ViewHolder holder : additions) {
+            if (animated < animateLimit) {
+                if (fromBottom) {
+                    animateAddImpl(holder, addedItemsHeight);
+                } else {
+                    animateHistoryAddImpl(holder, animated);
+                }
+                animated++;
+            } else {
+                snapAddFinished(holder);
+            }
         }
     }
 
@@ -378,15 +408,7 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
             additions.addAll(mPendingAdditions);
             mPendingAdditions.clear();
 
-            if (shouldSkipAddAnimations(additions.size())) {
-                for (RecyclerView.ViewHolder holder : additions) {
-                    snapAddFinished(holder);
-                }
-            } else {
-                for (RecyclerView.ViewHolder holder : additions) {
-                    animateAddImpl(holder, addedItemsHeight);
-                }
-            }
+            dispatchCompleteAddBatch(additions, true, addedItemsHeight);
             additions.clear();
         }
     }
@@ -420,10 +442,10 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
     public boolean animateAdd(RecyclerView.ViewHolder holder) {
         resetAnimation(holder);
         if (!shouldAnimateEnterFromBottom) {
-            // History / mid-list inserts: fade + slight rise + soft scale
+            // History / mid-list inserts: full fade + rise + soft scale
             holder.itemView.setAlpha(0f);
-            holder.itemView.setScaleX(0.94f);
-            holder.itemView.setScaleY(0.94f);
+            holder.itemView.setScaleX(HISTORY_ENTER_START_SCALE);
+            holder.itemView.setScaleY(HISTORY_ENTER_START_SCALE);
             holder.itemView.setTranslationY(AndroidUtilities.dp(HISTORY_ENTER_TRANSLATION_DP));
         } else {
             holder.itemView.setAlpha(NEW_MESSAGE_START_ALPHA);
@@ -1588,8 +1610,8 @@ public class ChatListItemAnimator extends DefaultItemAnimator {
             view.setTranslationY(AndroidUtilities.dp(HISTORY_ENTER_TRANSLATION_DP));
         }
         if (view.getScaleX() >= 0.999f) {
-            view.setScaleX(0.94f);
-            view.setScaleY(0.94f);
+            view.setScaleX(HISTORY_ENTER_START_SCALE);
+            view.setScaleY(HISTORY_ENTER_START_SCALE);
         }
         view.setAlpha(0f);
 

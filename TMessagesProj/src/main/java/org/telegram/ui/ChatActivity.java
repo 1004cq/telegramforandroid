@@ -27354,29 +27354,34 @@ public class ChatActivity extends BaseFragment implements
         if (initialMessagesAppearPlayed || chatListView == null || chatListItemAnimator == null) {
             return;
         }
-        if (!SharedConfig.animationsEnabled() || SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_LOW) {
+        if (!SharedConfig.animationsEnabled()) {
             initialMessagesAppearPlayed = true;
             return;
         }
         final int childCount = chatListView.getChildCount();
-        if (childCount <= 0 || childCount > ChatListItemAnimator.maxAnimatedAdditions() + 4) {
+        if (childCount <= 0) {
             initialMessagesAppearPlayed = true;
             return;
         }
         initialMessagesAppearPlayed = true;
+        final int animateLimit = ChatListItemAnimator.maxAnimatedAdditions();
         int animated = 0;
-        for (int i = childCount - 1; i >= 0 && animated < ChatListItemAnimator.maxAnimatedAdditions(); i--) {
+        for (int i = childCount - 1; i >= 0 && animated < animateLimit; i--) {
             View child = chatListView.getChildAt(i);
             if (!(child instanceof ChatMessageCell) && !(child instanceof ChatActionCell)) {
                 continue;
             }
             child.animate().cancel();
             child.setAlpha(0f);
-            child.setTranslationY(AndroidUtilities.dp(8));
+            child.setScaleX(0.94f);
+            child.setScaleY(0.94f);
+            child.setTranslationY(AndroidUtilities.dp(10));
             child.animate()
                     .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
                     .translationY(0)
-                    .setStartDelay(animated * 18L)
+                    .setStartDelay(animated * 20L)
                     .setDuration(ChatListItemAnimator.DEFAULT_DURATION)
                     .setInterpolator(ChatListItemAnimator.HISTORY_ENTER_INTERPOLATOR)
                     .start();
@@ -38566,10 +38571,11 @@ public class ChatActivity extends BaseFragment implements
             if (BuildVars.LOGS_ENABLED) {
                 FileLog.d("notify item range inserted " + positionStart + ":" + itemCount);
             }
-            // Large history batches: skip item animator so scroll stays smooth.
-            final boolean skipAnim = !fragmentBeginToShow
-                    || (chatListItemAnimator != null && chatListItemAnimator.shouldSkipAddAnimations(itemCount));
-            if (skipAnim) {
+            // Keep ItemAnimator so visible inserts play a complete enter; only detach
+            // when animations are off / degraded / fast-scroll (animator snaps extras).
+            final boolean keepAnim = fragmentBeginToShow
+                    && (chatListItemAnimator == null || chatListItemAnimator.shouldKeepItemAnimatorForInsert(itemCount));
+            if (!keepAnim) {
                 chatListView.setItemAnimator(null);
             } else if (chatListView.getItemAnimator() != chatListItemAnimator) {
                 chatListView.setItemAnimator(chatListItemAnimator);

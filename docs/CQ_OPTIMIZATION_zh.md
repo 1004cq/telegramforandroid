@@ -31,7 +31,11 @@
 | `BuildVars` 分叉默认 | `SUPPORTS_PASSKEYS=false`、`IS_BILLING_UNAVAILABLE=true`、更新 URL → me.cq.je；API 密钥走 `local.properties` |
 | `ApplicationLoaderImpl.isStandalone()` | 侧载分发走 standalone 更新路径 |
 | 登录页代理按钮 | **始终显示**，未登录即可配置代理 |
+<<<<<<< HEAD
 | 应用内浏览器走代理 | SOCKS5 经 `ProxyController` 作用于 ArticleViewer / WebView（见 `docs/WEBVIEW_PROXY_zh.md`） |
+=======
+| 聊天消息加载动画 | 历史淡入上移、新消息底部插入、首屏渐显；大批量自动降级（见 `docs/CHAT_MESSAGE_LOAD_ANIM_zh.md`） |
+>>>>>>> origin/cursor/chat-message-load-anim-8111
 | Liquid Glass（对齐 iOS 26） | 中高端机 + API 33 默认开启；略增强折射强度 |
 | `org.gradle.caching=true` | 加速重复构建 |
 | `local.properties.example` | 密钥 / SDK 不进仓库 |

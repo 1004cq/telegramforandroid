@@ -160,6 +160,7 @@ import org.telegram.ui.bots.BotWebViewSheet;
 import org.telegram.ui.bots.ChatAttachAlertBotWebViewLayout;
 import org.telegram.ui.bots.SetupEmojiStatusSheet;
 import org.telegram.ui.bots.WebViewRequestProps;
+import org.telegram.utils.proxy.WebViewProxyHelper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -443,6 +444,8 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
             FileLog.e(e);
         }
         webView = replaceWith == null ? new MyWebView(getContext(), bot, bot ? botUser == null ? 0 : botUser.id : 0) : replaceWith;
+        // Ensure ArticleViewer / in-app browser WebViews honor the client SOCKS5 proxy.
+        WebViewProxyHelper.syncFromSharedConfig();
         if (!bot) {
             CookieManager cookieManager = CookieManager.getInstance();
             cookieManager.setAcceptCookie(true);
@@ -4106,7 +4109,7 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
                         HttpURLConnection connection = null;
                         try {
                             URL connectionUrl = new URL(request.getUrl().toString());
-                            connection = (HttpURLConnection) connectionUrl.openConnection();
+                            connection = WebViewProxyHelper.openConnection(connectionUrl);
                             connection.setRequestMethod(request.getMethod());
                             if (request.getRequestHeaders() != null) {
                                 for (Map.Entry<String, String> e: request.getRequestHeaders().entrySet()) {

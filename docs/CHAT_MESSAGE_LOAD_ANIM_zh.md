@@ -76,16 +76,26 @@ chatListItemAnimator.setShouldAnimateEnterFromBottom(true);
 
 ---
 
-## 3. 推荐动画参数
+## 3. 推荐动画参数与高效 API
 
-| 场景 | 方式 | 时长 | 插值器 |
+| 场景 | API（优先） | 时长 | 插值器 |
 | --- | --- | --- | --- |
-| 历史加载 | fade + translateY + soft scale | 240ms | `EASE_OUT_QUINT` |
-| 新消息 | translateY 整块上推 + fade + micro-scale | 240ms | `EASE_OUT_QUINT` |
-| 首屏 | 可见 cell 错峰 fade + 8dp | 240ms + 18ms×index | `EASE_OUT_QUINT` |
-| 下滑按钮 | alpha + scale 0.7→1 + translateY | ~260ms | `EASE_OUT_QUINT` |
+| 历史加载 | **`ViewPropertyAnimator`**（alpha + translationY + scale） | 240ms | **`FastOutSlowIn`** `PathInterpolator(0.4,0,0.2,1)` |
+| 新消息 | **`SpringAnimation`**（TRANSLATION_Y）+ **VPA**（alpha/scale） | ~200–300ms 手感 | Spring `STIFFNESS≈700` + FastOutSlowIn |
+| 首屏 | **`ViewPropertyAnimator`** 错峰 | 240ms + 18ms×index | FastOutSlowIn |
+| 删除淡出 | **`ViewPropertyAnimator`** | ~180ms | FastOutSlowIn |
+| 下滑按钮 | `BoolAnimator` | ~260ms | `EASE_OUT_QUINT`（接近 FastOutSlowIn） |
+| 欢迎贴纸特例 | `AnimatorSet` + `ValueAnimator`（图片坐标） | 350ms | Overshoot |
 
-说明：上游原 `DEFAULT_INTERPOLATOR` 自定义贝塞尔已改为更常见的 `EASE_OUT_QUINT`（`.23, 1, .32, 1`），手感更「现代聊天」、不易拖沓。关闭路径：设置 → 动画 / `view_animations`。
+高效动画原则（已落地）：
+
+- 优先 `ViewPropertyAnimator` / `SpringAnimation`，避免为常见进出场再建 `AnimatorSet`+多路 `ObjectAnimator`
+- 时长落在 **200–300ms**，不拖沓
+- 插值器用 Material **FastOutSlowIn** 或自定义贝塞尔
+- Activity/窗口默认硬件加速即可；不对每条消息强开 `LAYER_TYPE_HARDWARE`（易增内存与过度绘制）
+- 大批量 / 低端机 / 快速滚动时降级跳过动画
+
+关闭路径：设置 → 动画 / `view_animations`。
 
 ---
 

@@ -167,10 +167,11 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
     private boolean drawCommunityAvatar;
     private boolean isShareToStoryCell;
     public ShareDialogCell.RepostStoryDrawable repostStoryDrawable;
-    public int avatarStart = 11;
-    public int messagePaddingStart = 72;
-    public int heightDefault = 70;
-    public int heightThreeLines = 76;
+    public int avatarStart = 12;
+    public int messagePaddingStart = 74;
+    /** MD3 list density: slightly taller rows for avatar / title / subtitle breathing room. */
+    public int heightDefault = 74;
+    public int heightThreeLines = 80;
     public int addHeightForTags = 3;
     public int addForumHeightForTags = 11;
     public TLRPC.TL_forumTopic forumTopic;

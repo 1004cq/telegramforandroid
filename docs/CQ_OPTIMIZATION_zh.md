@@ -31,6 +31,7 @@
 | `BuildVars` 分叉默认 | `SUPPORTS_PASSKEYS=false`、`IS_BILLING_UNAVAILABLE=true`、更新 URL → me.cq.je；API 密钥走 `local.properties` |
 | `ApplicationLoaderImpl.isStandalone()` | 侧载分发走 standalone 更新路径 |
 | 登录页代理按钮 | **始终显示**，未登录即可配置代理 |
+| 聊天列表 MD3 点状优化 | 文件夹 Chip、DialogCell 间距、底栏选中、列表插入动画（见 `docs/DIALOGS_MD3_zh.md`） |
 | Liquid Glass（对齐 iOS 26） | 中高端机 + API 33 默认开启；略增强折射强度 |
 | `org.gradle.caching=true` | 加速重复构建 |
 | `local.properties.example` | 密钥 / SDK 不进仓库 |

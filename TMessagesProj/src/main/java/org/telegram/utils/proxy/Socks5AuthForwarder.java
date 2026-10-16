@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 final class Socks5AuthForwarder {
     private static final int METHOD_NO_AUTH = 0x00;
     private static final int METHOD_USER_PASS = 0x02;
-    private static final int METHOD_NONE = 0xFF;
     private static final int CMD_CONNECT = 0x01;
     private static final int ATYP_IPV4 = 0x01;
     private static final int ATYP_DOMAIN = 0x03;

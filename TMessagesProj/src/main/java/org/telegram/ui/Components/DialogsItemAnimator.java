@@ -8,11 +8,12 @@ import android.animation.TimeInterpolator;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.PathInterpolator;
 
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.ui.Adapters.DialogsAdapter;
 import org.telegram.ui.Cells.DialogCell;
 import org.telegram.ui.Cells.DialogsEmptyCell;
@@ -23,7 +24,8 @@ import java.util.List;
 public class DialogsItemAnimator extends SimpleItemAnimator {
     private static final boolean DEBUG = false;
 
-    private static TimeInterpolator sDefaultInterpolator = new DecelerateInterpolator();
+    /** Material FastOutSlowIn — preferred for 120fps-friendly dialogs list motion. */
+    private static TimeInterpolator sDefaultInterpolator = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
 
     private ArrayList<ViewHolder> mPendingRemovals = new ArrayList<>();
     private ArrayList<ViewHolder> mPendingAdditions = new ArrayList<>();
@@ -43,8 +45,10 @@ public class DialogsItemAnimator extends SimpleItemAnimator {
     private int topClip;
     private int bottomClip;
 
-    private final static int deleteDuration = 180;
-    private final static int changeDuration = 180;
+    /** Keep ≤250ms so inserts stay snappy on high-refresh panels. */
+    private final static int deleteDuration = 200;
+    private final static int changeDuration = 200;
+    private final static int addDuration = 220;
 
     private static class MoveInfo {
         public ViewHolder holder;
@@ -288,8 +292,14 @@ public class DialogsItemAnimator extends SimpleItemAnimator {
         final View view = holder.itemView;
         mAddAnimations.add(holder);
 
+        if (view.getAlpha() < 1f && view.getTranslationY() == 0f) {
+            view.setTranslationY(AndroidUtilities.dp(6));
+        }
         final ViewPropertyAnimator animation = view.animate();
-        animation.alpha(1).setDuration(deleteDuration)
+        animation.alpha(1)
+                .translationY(0)
+                .setDuration(addDuration)
+                .setInterpolator(sDefaultInterpolator)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationStart(Animator animator) {
@@ -299,11 +309,13 @@ public class DialogsItemAnimator extends SimpleItemAnimator {
                     @Override
                     public void onAnimationCancel(Animator animator) {
                         view.setAlpha(1);
+                        view.setTranslationY(0);
                     }
 
                     @Override
                     public void onAnimationEnd(Animator animator) {
                         animation.setListener(null);
+                        view.setTranslationY(0);
                         dispatchAddFinished(holder);
                         mAddAnimations.remove(holder);
                         dispatchFinishedWhenDone();
